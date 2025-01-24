@@ -49,6 +49,7 @@ python demo/demo_pt.py
 python demo/demo_sft.py
 python demo/demo_dpo.py
 ```
+
 ## 模型下载链接
 本项目将训练过程中的几乎所有模型都进行了保存，下载链接如下：
 | 训练阶段 | 模型名称               | 下载链接                                                                      | 备注                 |
@@ -94,7 +95,7 @@ python demo/demo_dpo.py
 | mathematics_statistics/english/high                   | 42G      | 1.4G     |
 | **总计**                                               | **141G** | **40G** |
 
-```
+```json
 # 参考utils/demo_view_data.py，取出数据查看
 
 {
@@ -124,7 +125,7 @@ python demo/demo_dpo.py
 | 聊天数据集   | InfInstruct-0625       | 659,808   | 1.2G      | 2024.8   |
 | 聊天数据集   | InfInstruct-Gen (0729) | 1,456,927 | 2.7G      | 2025.1   |
 
-```
+```json
 # 参考utils/demo_view_data.py，取出数据查看
 
 {
@@ -159,32 +160,32 @@ python demo/demo_dpo.py
 | train                  | 59,338   | 206M     |
 | test                   | 100      | 350K     |
 
-```
+```json
 # 参考utils/demo_view_data.py，取出数据查看
 
 {
-   'task_category': 'culinary_knowledge', 
-   'prompt': '请详细介绍一道具有。。。。。。的烹饪食谱。', 
-   'chosen': [
+   "task_category": "culinary_knowledge", 
+   "prompt": "请详细介绍一道具有。。。。。。的烹饪食谱。", 
+   "chosen": [
       {
-         'content': '请详细介绍一道具有。。。。。。的烹饪食谱。', 
-         'role': 'user'
+         "content": "请详细介绍一道具有。。。。。。的烹饪食谱。", 
+         "role": "user"
       }, 
       {
-         'content': '##  苏州松鼠鳜鱼。。。。。。希望这份详细的介绍和食谱能帮助您在家中成功制作这道经典的苏州名菜！', 
-         'role': 'assistant'
+         "content": "##  苏州松鼠鳜鱼。。。。。。希望这份详细的介绍和食谱能帮助您在家中成功制作这道经典的苏州名菜！", 
+         "role": "assistant"
       }
       ], 
-   'rejected': [
+   "rejected": [
       {
-         'content': '请详细介绍一道具有。。。。。。的烹饪食谱。', 
-         'role': 'user'
+         "content": "请详细介绍一道具有。。。。。。的烹饪食谱。", 
+         "role": "user"
       }, 
       {
-         'content': '##  醉虾 - 揭秘苏帮菜的鲜美与历史。。。。。。感受江南的美食魅力！', 'role': 'assistant'
+         "content": "##  醉虾 - 揭秘苏帮菜的鲜美与历史。。。。。。感受江南的美食魅力！", "role": "assistant"
       }
       ], 
-   'id': 11
+   "id": 11
 }
 ```
 
@@ -192,7 +193,7 @@ python demo/demo_dpo.py
 ### 模型与数据下载
 若从头训练，模型不需要下载，本项目已经包含模型配置文件。若想基于现有模型进行继续训练，可按需下载模型参数。
 数据集包含多种行业多种类别数据，可按需下载。
-```
+```bash
 # 具体下载流程可参考prepare.sh
 
 bash prepare.sh
@@ -201,11 +202,11 @@ bash prepare.sh
 ### 预训练(pt)
 本项目在预训练阶段，调整模型参数至1B，使用Trainer进行训练，并参考LLaMA-Factory，对数据进行序列打包(sequences packing)，使用Accelerate和deepspeed进行分布式训练，使用flash_attention_2进行加速，设置序列长度为1024。  
 预训练数据格式参考qwen，在文本末尾添加结束符。
-```
+```bash
 text = text + "<|im_end|>"
 ```
 启动命令：
-```
+```bash
 # 参考run.sh
 
 # 单卡在命令行运行
@@ -216,7 +217,7 @@ accelerate launch --config_file accelerate_config.yaml mini_qwen_pt.py
 nohup accelerate launch --config_file accelerate_config.yaml mini_qwen_pt.py > logs/output_pt.log 2>&1 &
 ```
 在mini_qwen_pt.py文件中，需要注意以下参数的设置：
-```
+```python
 # 模型参数调整代码
 config.num_attention_heads = 16
 config.num_key_value_heads = 4
@@ -270,11 +271,11 @@ def preprocess_dataset(examples):
 TRL并未采用最新版本，而是采用了较低版本(0.11.4)，低版本与高版本的参数设置存在差异，使用不正确的版本运行会报错。  
 **注意：请确保 pip install trl==0.11.4**  
 微调数据格式参考qwen，在文本前后位置添加特殊字符。
-```
+```python
 text = f"<|im_start|>user\n{human_text}<|im_end|>\n<|im_start|>assistant\n{gpt_text}<|im_end|>"
 ```
 启动命令：
-```
+```bash
 # 参考run.sh
 
 # 单卡在命令行运行
@@ -285,7 +286,7 @@ accelerate launch --config_file accelerate_config.yaml mini_qwen_sft.py
 nohup accelerate launch --config_file accelerate_config.yaml mini_qwen_sft.py > logs/output_sft.log 2>&1 &
 ```
 在mini_qwen_sft.py文件中，需要注意以下参数的设置：
-```
+```python
 # flash_attention_2
 model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch.bfloat16, attn_implementation="flash_attention_2")
 
@@ -327,13 +328,13 @@ TRL并未采用最新版本，而是采用了较低版本(0.11.4)，低版本与
 pip install trl==0.11.4**  
 **pip install transformers==4.45.0**  
 偏好数据格式参考qwen，在文本前后位置添加特殊字符。
-```
+```python
 prompt = f"<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"
 chosen = f"{chosen}<|im_end|>"
 rejected = f"{rejected}<|im_end|>"
 ```
 启动命令：
-```
+```bash
 # 参考run.sh
 
 # 单卡在命令行运行
@@ -344,7 +345,7 @@ accelerate launch --config_file accelerate_config.yaml mini_qwen_dpo.py
 nohup accelerate launch --config_file accelerate_config.yaml mini_qwen_dpo.py > logs/output_dpo.log 2>&1 &
 ```
 在mini_qwen_dpo.py文件中，需要注意以下参数的设置：
-```
+```python
 # flash_attention_2
 model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch.bfloat16, attn_implementation="flash_attention_2")
 
@@ -379,7 +380,7 @@ trainer = DPOTrainer(
 
 ### 模型评估
 本项目在模型评估阶段，设置了2种模式的prompt，可以用来测试预训练、微调和直接偏好优化模型的差异。
-```
+```python
 # 预训练
 text = prompt 
 
@@ -387,7 +388,7 @@ text = prompt
 text = f"<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"
 ```
 启动命令：
-```
+```bash
 python mini_qwen_eval.py
 ```
 
@@ -409,7 +410,7 @@ loss曲线先迅速下降，后缓慢降低，非常符合预期。
 
 #### 模型评估
 - 直接询问模型问题，可以看出模型会出现复读机现象(过长的重复内容使用。。。。。。省略)。
-```
+```bash
 # 按照预训练的格式，直接输入文本，不添加特殊字符
 # text = prompt
 
@@ -437,7 +438,7 @@ loss曲线先迅速下降，后缓慢降低，非常符合预期。
 
 - pt1使用常规方法，pt2使用序列打包方法。由于训练数据只使用了accommodation_catering_hotel，因此询问模型关于住宿-餐饮-酒店的问题，可以看出pt1和pt2均会出现复读机现象(过长的重复内容使用。。。。。。省略)，这意味着复读机现象并不是由于序列打包导致的。
 - pt3使用常规方法，中英文混合数据。与pt1做对比，可以看出，英文数据确实有助于增强模型的中文能力，虽然效果依然不好。但是无论pt1还是pt3，模型会过于关注双引号“""”，这可能是由于训练数据太少，而数据中的标点符号比较多，模型错误地认为标点符号是很重要的。
-```
+```bash
 # 按照预训练的格式，直接输入文本，不添加特殊字符
 # text = prompt
 
@@ -461,7 +462,7 @@ loss曲线先迅速下降，后缓慢降低，非常符合预期。
 ```
 - 假设复读机现象是由于缺乏多样性的数据或大规模的数据(参考小红书面经中对于复读机现象的解释)，为了更近一步分析复读机现象的成因，本项目分别测试了Qwen2.5-0.5B和Qwen2.5-1.5B模型。发现复读机现象依然存在(过长的重复内容使用。。。。。。省略)。qwen模型在预训练过程中，必定会使用高质量、多样性的数据，依然出现复读机现象，这说明了数据并不是复读机现象出现的原因。
 - 之前笔者也做过基于Qwen2.5-0.5B和Qwen2.5-0.5B-Instruct的续训练实验，均出现复读机现象(Qwen2.5-0.5B的复读机现象更严重)，因此可以大胆猜测，复读机现象与预训练的任务有关，而微调可以缓解甚至解决此问题。预训练与微调都是根据已有文本预测下一个token，但是预训练是直接使用原有文本进行预测，微调是在问题的前后位置添加特殊字符，相当于对文本进行了格式化。在微调的过程中，这种格式化的数据可以让模型更好地理解用户问题(笔者之前做过实验，发现大模型非常擅长格式)，从而生成更流利的回答。
-```
+```bash
 # 按照预训练的格式，直接输入文本，不添加特殊字符
 # text = prompt
 
@@ -509,7 +510,7 @@ loss曲线先迅速下降，后缓慢降低，非常符合预期。通过细心�
 - 2epoch时，复读机现象减轻，能够成功预测终止符(在1epoch时，通常会重复到最大文本长度)。
 - 3epoch时，复读机现象依然存在，在“绿豆糕”问题中，会一直重复直至最大文本长度。
 - 通过3个epoch的分析，可以惊奇地发现模型的自我认知(I am an AI language model created by OpenAI)已经形成，这得益于微调数据集中存在的自我认知数据。这也说明了知识注入并不一定是在预训练阶段，在微调阶段，模型不仅可以学习人类对话的格式，也可以学习到知识。  
-```
+```bash
 # 按照微调的格式，在文本前后添加特殊字符
 # text = f"<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"
 
@@ -578,7 +579,7 @@ loss曲线隐约呈现阶梯状，说明模型稍微过拟合了。
 
 #### 模型评估
 - 观察3个epoch，模型还是会出现复读机现象(过长的重复内容使用。。。。。。省略)。整体来说，虽然在dpo方面进行了很多尝试(3次失败的dpo训练中，每种训练也测试过3个epoch的性能，测试结果和目前展现的结果没有太大差别，因此这里就不赘述)，但dpo并没有想象中的增强模型性能，反而会降低模型性能。这说明强化学习部分在提升模型性能方面，可能存在一些严格的条件设置。在数据规模、数据质量和模型优化技巧方面如果没有太多积累的情况下，使用强化学习可能并不是一个好的选择。
-```
+```bash
 # 按照微调的格式，在文本前后添加特殊字符
 # text = f"<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"
 
@@ -624,7 +625,7 @@ loss曲线隐约呈现阶梯状，说明模型稍微过拟合了。
     按照魔塔教程下载数据 https://www.modelscope.cn/docs/datasets/download
 
 2. 怎么查看目录下各个文件夹的大小？动态查看GPU使用情况？TRL的版本？Transformers的版本？  
-    ```
+    ```bash
     du -sh * | sort -h  
     watch -n 1 nvidia-smi  
     pip install trl==0.11.4  # 请确保trl的版本正确，否则会因为不同版本参数不同而报错
@@ -648,7 +649,7 @@ loss曲线隐约呈现阶梯状，说明模型稍微过拟合了。
     序列打包设置的分块block_size = 1024，而我使用的是高质量数据，文本的长度很多都超过1024，导致原来一条数据会被切分成多条数据，从而导致序列打包后数据条数反而会增加。
 
 8. 在训练的过程中，由于save_steps设置太小，导致我保存了很多个中间模型和优化器状态，优化器状态对我没用，我不想保存，怎么办？我只想保留几个中间模型，不想保存太多中间模型，怎么办？我想按epoch保存中间模型，怎么办？  
-    ```
+    ```python
     # 在TrainingArguments中，设置以下参数：  
 
     save_only_model=True   # 只保存模型
@@ -661,7 +662,7 @@ loss曲线隐约呈现阶梯状，说明模型稍微过拟合了。
 
 10. ~~微调阶段，同时加载7M和Gen数据，报错：pyarrow.lib.ArrowInvalid: Failed to parse string: '2589db48810b4f059e0ec70069027e4d' as a scalar of type int64~~  
     这是因为7M和Gen数据虽然具有相同的字段，但是在id字段，二者的数据类型不同，一个是int，另一个是string，二者无法合并。去除id字段就可以合并了，解决办法：  
-    ```
+    ```python
     dataset_7M = load_dataset("parquet", data_files=data_files_7M, split="train").remove_columns(["id"])  
     dataset_Gen = load_dataset("parquet", data_files=data_files_Gen, split="train").remove_columns(["id"])  
     dataset = concatenate_datasets([dataset_7M, dataset_Gen])
@@ -669,14 +670,14 @@ loss曲线隐约呈现阶梯状，说明模型稍微过拟合了。
     
 11. ~~微调阶段，加载7M数据，报错：ValueError: The features can't be aligned because the key label of features {'conversations': [{'from': Value(dtype='string', id=None), 'value': Value(dtype='string', id=None)}], 'label': Value(dtype='string', id=None), 'langdetect': Value(dtype='string', id=None), 'source': Value(dtype='string', id=None)} has unexpected type - Value(dtype='string', id=None) (expected either {'ability_en': Sequence(feature=Value(dtype='string', id=None), length=-1, id=None), 'ability_zh': Sequence(feature=Value(dtype='string', id=None), length=-1, id=None), 'cate_ability_en': Sequence(feature=Value(dtype='string', id=None), length=-1, id=None), 'cate_ability_zh': Sequence(feature=Value(dtype='string', id=None), length=-1, id=None)} or Value("null").~~  
     label字段的定义与实际的数据结构不匹配。只能去掉label字段。结合10，最终处理方案：  
-    ```
+    ```python
     for i in range(k):  
       dataset = load_dataset("parquet", data_files=full_path, split="train").remove_columns(["id", "label"])  
       files.append(dataset)  
     datasets=concatenate_datasets(files)
     ```
-    受[我还要去采果子呢](https://www.zhihu.com/people/bing-ning-meng-52-6)的启发，在load_dataset中只加载需要的字段的数据，避免不同数据字段格式不同的问题。修改如下：
-    ```
+更新问题10和问题11，受[我还要去采果子呢](https://www.zhihu.com/people/bing-ning-meng-52-6)的启发，在load_dataset中只加载需要的字段的数据，避免不同数据字段格式不同的问题。修改如下：
+    ```python
     # 预训练
     dataset = load_dataset("parquet", data_files=data_files, split="train", columns=["text"])
 
@@ -689,7 +690,7 @@ loss曲线隐约呈现阶梯状，说明模型稍微过拟合了。
 
 13. 微调阶段，出现警告UserWarning: Could not find response key `<|im_start|>assistant\n` in the following instance: <|im_start|>user\ndef find_relevant_word(words):。。。。。。  
     这是因为在编码的时候，tokenizer采用bpe算法，结合上下文可能会将`<|im_start|>assistant\n`编码成不同方式，解决办法：  
-    ```
+    ```python
     response_template = "<|im_start|>assistant\n"  
     response_template_ids = tokenizer.encode(response_template, add_special_tokens=False)[2:]  
     collator = DataCollatorForCompletionOnlyLM(response_template_ids, tokenizer=tokenizer, mlm=False)  
@@ -709,7 +710,7 @@ loss曲线隐约呈现阶梯状，说明模型稍微过拟合了。
     在测试微调模型的时候，我也是在命令行中拼接特殊字符，发现模型的回答效果很差，我又尝试使用qwen的数据拼接模式(通过tokenizer.apply_chat_template添加system、user和assistant的特殊字符)，效果很好，因此我怀疑是因为在训练的过程中，使用SFTTrainer时，默认按照apply_chat_template添加了system的特殊字符。因此我查看了SFTTrainer与其基类Trainer、DataCollatorForCompletionOnlyLM与其基类DataCollatorForLanguageModeling的源码，均为发现apply_chat_template函数，这意味着在训练过程中并未添加system的特殊字符。  
     我又尝试设置`text = f"<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"`，模型回答效果很好，这意味着命令行输入特殊字符和在程序中设置特殊字符是有区别的，为了分析他们的不同，我将程序中设置的特殊字符打印在命令行，发现“\n”在命令行中是直接将文本换行了，与我如果直接在命令行中输入“\n”是不同的。  
     因此基本可以确定是“\n”的问题，为了探究从命令行直接输入“\n”在程序中被转化成什么东西，我debug了以下代码：  
-    ```
+    ```python
     a = '\n'    # a = '\n'  
     b = input() # b = '\\n'  
     ```
