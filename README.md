@@ -9,6 +9,7 @@
 - [结果分析与模型评估](#结果分析与模型评估)
 - [猜你想问](#猜你想问)
 - [总结](#总结)
+- [避坑建议](#避坑建议)
 
 ## 简介
 mini_qwen是一个从头开始训练的1B参数的大型语言模型(LLM)项目，包括预训练(PT)、微调(SFT)和直接偏好优化(DPO)3个部分。其中预训练和微调仅需要12G显存即可训练，直接偏好优化仅需要14G显存即可训练，这意味着使用T4显卡就可以开始你的训练之旅。  
@@ -674,7 +675,7 @@ loss曲线隐约呈现阶梯状，说明模型稍微过拟合了。
       files.append(dataset)  
     datasets=concatenate_datasets(files)
     ```
-    受`我还要去采果子呢`的启发，在load_dataset中只加载需要的字段的数据，避免不同数据字段格式不同的问题。修改如下：
+    受[我还要去采果子呢](https://www.zhihu.com/people/bing-ning-meng-52-6)的启发，在load_dataset中只加载需要的字段的数据，避免不同数据字段格式不同的问题。修改如下：
     ```
     # 预训练
     dataset = load_dataset("parquet", data_files=data_files, split="train", columns=["text"])
@@ -739,3 +740,15 @@ loss曲线隐约呈现阶梯状，说明模型稍微过拟合了。
 - 知易行难，或者说，站着说话不腰疼。在我从头训练大模型之前，我以为整个流程会非常顺利，毕竟我学习自然语言处理多年，基本的编程能力和模型调优能力我都具备，即使面对不熟的领域我也可以很快学会。但是huggingface的高级api封装得比较好，我很难了解某个具体参数的意义与实现方式，同时大模型的训练方式也给我带来了很大的震撼，多卡并行、1epoch/3epoch训练(深度学习模型一般训练100epoch以内)、数据处理耗时(预训练大概需要1h)，这些都是难以想象的。而且如同我前面提到的问题，我在训练的过程中都遇到过，我从来没有想过我会遇到这么多bug。
 - 触类旁通。我在正式写代码之前，查看过qwen的tokenizer，对于特殊字符有了深刻的理解；在预训练的时候，观察到了复读机现象，从而阴差阳错地进行了scaling law实验，还发现qwen的预训练模型本身也存在复读机现象；在微调阶段发现了知识注入现象；在dpo的loss中对大模型过拟合有了直观的认知；在github上传项目，在huggingface上传模型与编辑模型卡片(model card)，使用github.dev修改文件(此时此刻就在用)。这些都激励着我，让我感觉做这个项目是值得的。
 - 总的来说，收获很大，我对于大模型的整个训练流程有了更深刻的理解，也希望您能从我的文档中，发现一些闪光点，能为您提供些许帮助。
+
+## 避坑建议
+感谢[我还要去采果子呢](https://www.zhihu.com/people/bing-ning-meng-52-6)分享的避坑建议：
+
+1. flash-attn要对应自己的pytorch、cuda、python版本下载，可以参考 https://link.zhihu.com/?target=https%3A//blog.csdn.net/a61022706/article/details/141570792
+
+2. 直接用bash下载的数据是所有的数据 下载的时候要按需下载仔细看
+
+3. flash-attn要对应自己的pytorch、cuda、python版本下载，可以参考 https://blog.csdn.net/a61022706/article/details/141570792
+
+4. deepspeed的新版本 有梯度同步的问题 可以设置累积梯度为1
+或者参考这个issue对版本降级 https://github.com/microsoft/DeepSpeed/issues/6793
