@@ -745,9 +745,13 @@ loss曲线隐约呈现阶梯状，说明模型稍微过拟合了。
 ## 避坑建议
 感谢[我还要去采果子呢](https://www.zhihu.com/people/bing-ning-meng-52-6)分享的避坑建议：
 
-1. flash-attn要对应自己的pytorch、cuda、python版本下载，可以参考 https://link.zhihu.com/?target=https%3A//blog.csdn.net/a61022706/article/details/141570792
+1. load_dataset()中中英文数据的列不同,我指定了添加的列(本项目已经按照此方式更新，预训练和微调只读取需要的字段)
+    ```python
+    columns_to_load = ['text', 'alnum_ratio', 'avg_line_length', 'char_rep_ratio', 'max_line_length', 'num_words', 'quality_score', 'special_char_ratio', 'industry_type']
+    dataset = load_dataset("parquet", data_files=data_files, split="train",columns=columns_to_load)
+    ```
 
-2. 直接用bash下载的数据是所有的数据 下载的时候要按需下载仔细看
+2. 直接用bash下载的数据是所有的数据 下载的时候要按需下载仔细看(本项目已经进行修改，在下载全量数据后会删除部分数据)
 
 3. flash-attn要对应自己的pytorch、cuda、python版本下载，可以参考 https://blog.csdn.net/a61022706/article/details/141570792
 
