@@ -676,8 +676,8 @@ loss曲线隐约呈现阶梯状，说明模型稍微过拟合了。
       files.append(dataset)  
     datasets=concatenate_datasets(files)
     ```
-更新问题10和问题11，受[我还要去采果子呢](https://www.zhihu.com/people/bing-ning-meng-52-6)的启发，在load_dataset中只加载需要的字段的数据，避免不同数据字段格式不同的问题。修改如下：  
-    ```python  
+    **更新问题10和问题11，受[我还要去采果子呢](https://www.zhihu.com/people/bing-ning-meng-52-6)的启发，在load_dataset中只加载需要的字段的数据，避免不同数据字段格式不同的问题。修改如下：**  
+    ```python
     # 预训练
     dataset = load_dataset("parquet", data_files=data_files, split="train", columns=["text"])
 
