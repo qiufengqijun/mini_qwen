@@ -707,7 +707,7 @@ loss曲线隐约呈现阶梯状，说明模型稍微过拟合了。
 
 16. 评估阶段，我直接在命令行输入如`<|im_start|>user\n李白是谁？<|im_end|>\n<|im_start|>assistant\n`，模型输出的答案效果很差，而在程序中设置`text = f"<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"`，命令行输入“李白是谁？”，模型输出的答案效果很好，是什么原因？  
     这个现象我是偶然间发现的，原本在测试预训练模型的时候，我测试了在命令行中拼接特殊字符，发现了非常不可思议的现象，即模型使用英文回答，通过进一步地分析，发现拼接的所有特殊字符均会对模型的输出造成影响，且特殊字符之间是相互影响的，所以我激动地将这个结论记录了下来。  
-    在测试微调模型的时候，我也是在命令行中拼接特殊字符，发现模型的回答效果很差，我又尝试使用qwen的数据拼接模式(通过tokenizer.apply_chat_template添加system、user和assistant的特殊字符)，效果很好，因此我怀疑是因为在训练的过程中，使用SFTTrainer时，默认按照apply_chat_template添加了system的特殊字符。因此我查看了SFTTrainer与其基类Trainer、DataCollatorForCompletionOnlyLM与其基类DataCollatorForLanguageModeling的源码，均为发现apply_chat_template函数，这意味着在训练过程中并未添加system的特殊字符。  
+    在测试微调模型的时候，我也是在命令行中拼接特殊字符，发现模型的回答效果很差，我又尝试使用qwen的数据拼接模式(通过tokenizer.apply_chat_template添加system、user和assistant的特殊字符)，效果很好，因此我怀疑是因为在训练的过程中，使用SFTTrainer时，默认按照apply_chat_template添加了system的特殊字符。因此我查看了SFTTrainer与其基类Trainer、DataCollatorForCompletionOnlyLM与其基类DataCollatorForLanguageModeling的源码，均未发现apply_chat_template函数，这意味着在训练过程中并未添加system的特殊字符。  
     我又尝试设置`text = f"<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"`，模型回答效果很好，这意味着命令行输入特殊字符和在程序中设置特殊字符是有区别的，为了分析他们的不同，我将程序中设置的特殊字符打印在命令行，发现“\n”在命令行中是直接将文本换行了，与我如果直接在命令行中输入“\n”是不同的。  
     因此基本可以确定是“\n”的问题，为了探究从命令行直接输入“\n”在程序中被转化成什么东西，我debug了以下代码：  
     ```python
