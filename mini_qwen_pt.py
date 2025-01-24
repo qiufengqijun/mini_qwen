@@ -59,7 +59,7 @@ directories = [
     "mathematics_statistics",
 ]
 data_files = find_files(directories)
-dataset = load_dataset("parquet", data_files=data_files, split="train")
+dataset = load_dataset("parquet", data_files=data_files, split="train", columns=["text"]) # 只保留text字段
 dataset = dataset.shuffle(seed=42)
 # dataset = dataset.shuffle(seed=42).select(range(20))
 # print(dataset[:3]);input()

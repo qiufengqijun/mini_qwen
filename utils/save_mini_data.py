@@ -4,6 +4,9 @@ import pandas as pd
 # input_file_path = "data/pt/accommodation_catering_hotel/chinese/high/rank_00000.parquet"
 # output_file_path = "mini_data/pt/accommodation_catering_hotel/chinese/high/rank_00000.parquet"
 
+# input_file_path = "data/pt/accommodation_catering_hotel/english/high/rank_00726.parquet"
+# output_file_path = "mini_data/pt/accommodation_catering_hotel/english/high/rank_00726.parquet"
+
 # input_file_path = "data/sft/7M/train-00000-of-00075.parquet"
 # output_file_path = "mini_data/sft/7M/train-00000-of-00075.parquet"
 

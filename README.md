@@ -658,7 +658,7 @@ loss曲线隐约呈现阶梯状，说明模型稍微过拟合了。
 9. trainer.save_model()之后，怎么没有保存tokenizer？  
     单独保存 `tokenizer.save_pretrained(output_path)`
 
-10. 微调阶段，同时加载7M和Gen数据，报错：pyarrow.lib.ArrowInvalid: Failed to parse string: '2589db48810b4f059e0ec70069027e4d' as a scalar of type int64  
+10. ~~微调阶段，同时加载7M和Gen数据，报错：pyarrow.lib.ArrowInvalid: Failed to parse string: '2589db48810b4f059e0ec70069027e4d' as a scalar of type int64~~  
     这是因为7M和Gen数据虽然具有相同的字段，但是在id字段，二者的数据类型不同，一个是int，另一个是string，二者无法合并。去除id字段就可以合并了，解决办法：  
     ```
     dataset_7M = load_dataset("parquet", data_files=data_files_7M, split="train").remove_columns(["id"])  
@@ -666,13 +666,21 @@ loss曲线隐约呈现阶梯状，说明模型稍微过拟合了。
     dataset = concatenate_datasets([dataset_7M, dataset_Gen])
     ```
     
-11. 微调阶段，加载7M数据，报错：ValueError: The features can't be aligned because the key label of features {'conversations': [{'from': Value(dtype='string', id=None), 'value': Value(dtype='string', id=None)}], 'label': Value(dtype='string', id=None), 'langdetect': Value(dtype='string', id=None), 'source': Value(dtype='string', id=None)} has unexpected type - Value(dtype='string', id=None) (expected either {'ability_en': Sequence(feature=Value(dtype='string', id=None), length=-1, id=None), 'ability_zh': Sequence(feature=Value(dtype='string', id=None), length=-1, id=None), 'cate_ability_en': Sequence(feature=Value(dtype='string', id=None), length=-1, id=None), 'cate_ability_zh': Sequence(feature=Value(dtype='string', id=None), length=-1, id=None)} or Value("null").  
-    label字段的定义与实际的数据结构不匹配。只能去掉label字段。结合10，最终处理方案：  
+11. ~~微调阶段，加载7M数据，报错：ValueError: The features can't be aligned because the key label of features {'conversations': [{'from': Value(dtype='string', id=None), 'value': Value(dtype='string', id=None)}], 'label': Value(dtype='string', id=None), 'langdetect': Value(dtype='string', id=None), 'source': Value(dtype='string', id=None)} has unexpected type - Value(dtype='string', id=None) (expected either {'ability_en': Sequence(feature=Value(dtype='string', id=None), length=-1, id=None), 'ability_zh': Sequence(feature=Value(dtype='string', id=None), length=-1, id=None), 'cate_ability_en': Sequence(feature=Value(dtype='string', id=None), length=-1, id=None), 'cate_ability_zh': Sequence(feature=Value(dtype='string', id=None), length=-1, id=None)} or Value("null").  
+    label字段的定义与实际的数据结构不匹配。只能去掉label字段。结合10，最终处理方案：~~  
     ```
     for i in range(k):  
       dataset = load_dataset("parquet", data_files=full_path, split="train").remove_columns(["id", "label"])  
       files.append(dataset)  
     datasets=concatenate_datasets(files)
+    ```
+    受`我还要去采果子呢`的启发，在load_dataset中只加载需要的字段的数据，避免不同数据字段格式不同的问题。修改如下：
+    ```
+    # 预训练
+    dataset = load_dataset("parquet", data_files=data_files, split="train", columns=["text"])
+
+    # 微调
+    dataset = load_dataset("parquet", data_files=data_files, split="train", columns=["conversations"])
     ```
 
 12. 微调阶段，假设我只选择20条数据，但是真正训练只有`6*num_proc`条数据，如果`6*num_proc>20`，报错：IndexError: list index out of range  

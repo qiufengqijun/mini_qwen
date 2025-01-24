@@ -16,20 +16,21 @@ tokenizer = AutoTokenizer.from_pretrained(model_path)
 
 
 def find_files(dirs):
-    files=[]
+    files = []
     for dir in dirs:
-        base_path = os.path.join("data/sft", dir)
+        base_path = os.path.join("mini_data/sft", dir)
         for dirpath, _, filenames in os.walk(base_path):
             for filename in filenames:
                 if filename.endswith(".parquet"):
                     full_path = os.path.join(dirpath, filename)
-                    dataset = load_dataset("parquet", data_files=full_path, split="train").remove_columns(["id", "label"])
-                    files.append(dataset)
-    return concatenate_datasets(files)
+                    files.append(full_path)
+    return files
 
 
 # 加载数据集并进行预处理
-dataset = find_files(["7M","Gen"])
+directories = ["7M","Gen"]
+data_files = find_files(directories)
+dataset = load_dataset("parquet", data_files=data_files, split="train", columns=["conversations"]) # 只保留conversations字段
 dataset = dataset.shuffle(seed=42)
 # dataset = dataset.shuffle(seed=42).select(range(20))
 # print(dataset[:3]);input()
