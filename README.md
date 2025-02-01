@@ -182,7 +182,8 @@ python demo/demo_dpo.py
          "role": "user"
       }, 
       {
-         "content": "##  醉虾 - 揭秘苏帮菜的鲜美与历史。。。。。。感受江南的美食魅力！", "role": "assistant"
+         "content": "##  醉虾 - 揭秘苏帮菜的鲜美与历史。。。。。。感受江南的美食魅力！", 
+         "role": "assistant"
       }
       ], 
    "id": 11
