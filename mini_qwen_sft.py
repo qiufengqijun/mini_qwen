@@ -18,7 +18,7 @@ tokenizer = AutoTokenizer.from_pretrained(model_path)
 def find_files(dirs):
     files = []
     for dir in dirs:
-        base_path = os.path.join("mini_data/sft", dir)
+        base_path = os.path.join("data/sft", dir)
         for dirpath, _, filenames in os.walk(base_path):
             for filename in filenames:
                 if filename.endswith(".parquet"):
