@@ -427,7 +427,7 @@ loss曲线先迅速下降，后缓慢降低，非常符合预期。
 ```
 - 复读机现象猜测是由于序列打包导致的，为了验证猜想，本项目使用accommodation_catering_hotel/chinese/high数据，分别使用常规方法和序列打包方法进行了预训练。具体训练日志见logs/output_pt1.log(常规)和logs/output_pt2.log(序列打包)。
 - 本项目想要探究中英文数据混合预训练时，模型是否可以理解不同语言的相关性，即通过增加英文数据，模型是否可以更好地理解中文问题，因此使用accommodation_catering_hotel/chinese/high和data/pt/accommodation_catering_hotel/english/high数据，使用常规方法进行了预训练。具体训练日志见logs/output_pt3.log(常规 中英文数据)。
-- 本项目还想要探究尺度定律(scaling law)，通过上述3个实验与本项目的预训练实验的loss曲线，可以验证尺度定律的有效性。loss曲线的横坐标为step(训练步数)，4个实验的超参数相同，每个step的数据量均为1152(总batch_size)。可以看出，4个实验的数据规模逐渐增加，loss曲线也越来越陡，loss的初始值越来越大，loss稳定时的值越来越小。
+- 本项目还想要探究尺度定律(scaling law)，通过上述3个实验与本项目的预训练实验的loss曲线，可以验证尺度定律的有效性。loss曲线的横坐标为step(训练步数)，4个实验的超参数相同，每个step的数据量均为1152(总batch_size)。~~可以看出，4个实验的数据规模逐渐增加，loss曲线也越来越陡，loss的初始值越来越大，loss稳定时的值越来越小。~~
 <table>
   <tr>
     <td><img src="images/training_loss_pt1.png" alt="Image 1" width="300"/></td>
@@ -436,6 +436,15 @@ loss曲线先迅速下降，后缓慢降低，非常符合预期。
     <td><img src="images/training_loss_pt.png" alt="Image" width="300"/></td>
   </tr>
 </table>
+
+- 将4个实验的loss合并如下图所示。在1个行业的数据中，pt1使用中文数据，常规方法；pt2使用中文数据，序列打包方法：pt3使用中英文数据，常规方法。pt使用10个行业的中英文数据，序列打包方法。与pt做对比，pt1、pt2和pt3几乎完全重合，且pt1、pt2和pt3的loss初始值比pt小，下降速度也比pt快，这主要是因为pt的数据包含10个行业，学习难度较大，而pt1、pt2和pt3仅包含1个行业，学习难度较小。
+
+![这是图片](images/training_loss_pt_comparison.png)
+
+- 将上图局部放大，可以发现pt1和pt2几乎完全重合，这意味着常规方法和序列打包可能并没有太大差异。
+pt3的最终loss小于pt1，这说明了中英文混合数据有助于降低loss。对于尺度定律的探究，具体来说，随着数据量的增加，loss的初始值逐渐增大，但最终的loss值会逐渐减小。
+
+![这是图片](images/training_loss_pt_comparison_part.png)
 
 - pt1使用常规方法，pt2使用序列打包方法。由于训练数据只使用了accommodation_catering_hotel，因此询问模型关于住宿-餐饮-酒店的问题，可以看出pt1和pt2均会出现复读机现象(过长的重复内容使用。。。。。。省略)，这意味着复读机现象并不是由于序列打包导致的。
 - pt3使用常规方法，中英文混合数据。与pt1做对比，可以看出，英文数据确实有助于增强模型的中文能力，虽然效果依然不好。但是无论pt1还是pt3，模型会过于关注双引号“""”，这可能是由于训练数据太少，而数据中的标点符号比较多，模型错误地认为标点符号是很重要的。
@@ -562,9 +571,9 @@ loss曲线隐约呈现阶梯状，说明模型稍微过拟合了。
 ![这是图片](images/training_loss_dpo.png)
 
 在上述dpo训练之前，本项目也有一些失败的尝试，在这里也将详细说明。  
-- 1.学习率初始设置为1e-6，选择sft 3epoch模型，进行训练，耗时约1h。具体训练日志见logs/output_dpo1.log。loss曲线呈现阶梯状下降，说明模型已经过拟合。
-- 2.调整学习率为5e-7，选择sft 3epoch模型，再次进行训练，耗时约1h。具体训练日志见logs/output_dpo2.log。loss曲线还是呈现阶梯状下降，说明模型还是有点过拟合。
-- 3.调整学习率为1e-7，选择sft 2epoch模型，再次进行训练，耗时约1h。具体训练日志见logs/output_dpo3.log。观察loss曲线，模型并未过拟合，但是loss下降幅度太低，仅下降0.03，说明学习率设置太低。
+- 1.学习率初始设置为1e-6，选择sft 3epoch模型，进行训练，耗时约1h。具体训练日志见logs/output_dpo1.log。dpo1 loss曲线呈现阶梯状下降，说明模型已经过拟合。
+- 2.调整学习率为5e-7，选择sft 3epoch模型，再次进行训练，耗时约1h。具体训练日志见logs/output_dpo2.log。dpo2 loss曲线还是呈现阶梯状下降，说明模型还是有点过拟合。
+- 3.调整学习率为1e-7，选择sft 2epoch模型，再次进行训练，耗时约1h。具体训练日志见logs/output_dpo3.log。观察dpo3 loss曲线，模型并未过拟合，但是loss下降幅度太低，仅下降0.03，说明学习率设置太低。
 <table>
   <tr>
     <td><img src="images/training_loss_dpo1.png" alt="Image 1" width="300"/></td>
@@ -574,9 +583,7 @@ loss曲线隐约呈现阶梯状，说明模型稍微过拟合了。
   </tr>
 </table>
 
-<!-- ![这是图片](images/training_loss_dpo1.png) -->
-<!-- ![这是图片](images/training_loss_dpo2.png) -->
-<!-- ![这是图片](images/training_loss_dpo3.png) -->
+![这是图片](images/training_loss_dpo_comparison.png)
 
 #### 模型评估
 - 观察3个epoch，模型还是会出现复读机现象(过长的重复内容使用。。。。。。省略)。整体来说，虽然在dpo方面进行了很多尝试(3次失败的dpo训练中，每种训练也测试过3个epoch的性能，测试结果和目前展现的结果没有太大差别，因此这里就不赘述)，但dpo并没有想象中的增强模型性能，反而会降低模型性能。这说明强化学习部分在提升模型性能方面，可能存在一些严格的条件设置。在数据规模、数据质量和模型优化技巧方面如果没有太多积累的情况下，使用强化学习可能并不是一个好的选择。
