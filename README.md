@@ -441,7 +441,7 @@ loss曲线先迅速下降，后缓慢降低，非常符合预期。
 
 ![这是图片](images/training_loss_pt_comparison.png)
 
-- 将上图局部放大，可以发现pt1和pt2几乎完全重合，这意味着常规方法和序列打包可能并没有太大差异。
+- 将上图局部放大(使用utils/plot_losses.py)，可以发现pt1和pt2几乎完全重合，这意味着常规方法和序列打包可能并没有太大差异。
 pt3的最终loss小于pt1，这说明了中英文混合数据有助于降低loss。对于尺度定律的探究，具体来说，随着数据量的增加，loss的初始值逐渐增大，但最终的loss值会逐渐减小。
 
 ![这是图片](images/training_loss_pt_comparison_part.png)
