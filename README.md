@@ -632,12 +632,13 @@ loss曲线隐约呈现阶梯状，说明模型稍微过拟合了。
 1. 我不需要下载所有的数据集，怎么下载数据集中的一部分？  
     按照魔塔教程下载数据 https://www.modelscope.cn/docs/datasets/download
 
-2. 怎么查看目录下各个文件夹的大小？动态查看GPU使用情况？TRL的版本？Transformers的版本？  
+2. 怎么查看目录下各个文件夹的大小？动态查看GPU使用情况？TRL的版本？Transformers的版本？怎么格式化python代码？  
     ```bash
     du -sh * | sort -h  
     watch -n 1 nvidia-smi  
     pip install trl==0.11.4  # 请确保trl的版本正确，否则会因为不同版本参数不同而报错
     pip install transformers==4.45.0 # 请确保transformers的版本正确
+    使用Black Formatter插件格式化代码
     ```
     
 3. 数据处理过程中，为什么设置num_proc=16和batch_size=5000？  
